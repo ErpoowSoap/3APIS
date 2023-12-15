@@ -1,14 +1,15 @@
 import express from "express";
 import UserRepository from "../repositories/UserRepository.js";
-import { adminMiddleware } from "../middlewares/adminMiddleware.js";
+import { employeeMiddleware } from "../middlewares/employeeMiddleware.js";
 import { z, object, string, array } from "zod";
 import { processRequestBody } from "zod-express-middleware";
 import { UserModel } from "../models/UserModel.js";
 import passport from "../passport.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-router.get("/", adminMiddleware, async (req, res) => {
+router.get("/", employeeMiddleware, async (req, res) => {
   const users = await UserRepository.listUsers();
   res.json(users);
 });
@@ -49,8 +50,39 @@ router.post("/register", processRequestBody(UserRegisterSchema), (req, res) => {
   );
 });
 
-router.post("/login", passport.authenticate("local"), (req, res) => {
-  res.status(200).send("Logged");
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedUser = await UserRepository.updateUser(id, req.body);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(updatedUser);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+
+router.post("/login", passport.authenticate("local"), async (req, res) => {
+  const user = await UserModel.findOne(
+    { username: req.body.username },
+    { username: 1, role: 1 },
+  );
+  
+  const payload = {
+    username: user.username,
+    role: user.role,
+  };
+
+  const token = jwt.sign(payload, 'ProjetRailRoad');
+
+  res.cookie("authorization", token, {httpOnly : true});
+
+  res.status(200).json({ token: token, message: "Logged" });
 });
 
 router.post("/", processRequestBody(UserCreationPayload), async (req, res) => {

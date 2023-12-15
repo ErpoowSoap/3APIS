@@ -1,20 +1,22 @@
 import { TrainModel } from "../models/TrainModel.js";
 
 class TrainRepository {
-  async getTrains({ startStation, endStation }) {
+  async getTrains({ sortBy, order, limit }) {
     const query = {};
+    const findQuery = TrainModel.find(query);
 
-    if (startStation) {
-      query.start_station = startStation;
+    if (sortBy) {
+      const sortOptions = {};
+      sortOptions[sortBy] = order === "desc" ? -1 : 1;
+      findQuery.sort(sortOptions);
     }
 
-    if (endStation) {
-      query.end_station = endStation;
+    if (limit) {
+      findQuery.limit(limit);
     }
 
-    return await TrainModel.find(query);
+    return await findQuery.exec();
   }
-
   async createTrain(payload) {
     const train = await TrainModel.create(payload);
 

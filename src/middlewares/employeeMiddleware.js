@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export function adminMiddleware(req, res, next) {
+export function employeeMiddleware(req, res, next) {
   const token = req.cookies.authorization;
 
   if (!token) {
@@ -10,7 +10,7 @@ export function adminMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, 'ProjetRailRoad');
 
-    if (decoded.role !== 'Admin') {
+    if (decoded.role !== 'Employee' && decoded.role !== 'Admin') {
       return res.status(403).json('Forbidden');
     }
 

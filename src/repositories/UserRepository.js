@@ -15,6 +15,16 @@ class UserRepository {
   async createUser(userPayload) {
     return await UserModel.create(userPayload);
   }
+  async updateUser(id, payload) {
+    const newUser = await UserModel.findOneAndUpdate(
+      {
+        _id: id,
+      },
+      payload
+    );
+
+    return newUser;
+  }
 }
 
 export default new UserRepository();

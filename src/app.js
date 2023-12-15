@@ -29,24 +29,6 @@ app.use(async function logRequest(req, res, next) {
   next();
 });
 
-app.get("/ping", (req, res) => {
-  console.log(req.cookies);
-  if (req.session.views) req.session.views += 1;
-  else req.session.views = 1;
-  console.log({ session: req.session, user: req.user });
-  res.send("pong");
-});
-
-app.post("/pong", (req, res) => {
-  const n = req.body.n;
-
-  if (n % 2 === 0) {
-    return res.send("pong");
-  } else {
-    return res.send("ping");
-  }
-});
-
 app.use("/trains", TrainRouter);
 app.use("/users", usersRouter);
 app.use("/trainstation", TrainStationRouter)
