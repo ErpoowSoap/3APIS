@@ -2,6 +2,7 @@ import express from "express";
 import TrainStationRepository from "../repositories/TrainStationRepository.js";
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
 const router = express.Router();
+const fetch = require("node-fetch");
 
 router.get("/", async (req, res) => {
   const { sortBy, order } = req.query;
@@ -18,10 +19,45 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const trainStation = await TrainStationRepository.getTrainStationById(id);
+
+    if (!trainStation) {
+      return res.status(404).send("Train station not found");
+    }
 
 
-router.post("/",adminMiddleware, async (req, res) => {
-  const trainStation = await TrainStationRepository.createTrainStation(req.body);
+    return res.json(trainStation);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+
+
+router.post("/", async (req, res) => {
+  const { imageUrl } = req.body;
+
+  if (!imageUrl) {
+    return res.status(400).send("Image URL is required");
+  }
+
+  const response = await fetch(imageUrl);
+  const imageData = await response.buffer();
+
+  const image = new Image();
+  image.src = imageData;
+
+  const resizedImage = image.resize({ width: 200, height: 200 });
+
+  const trainStation = await TrainStationRepository.createTrainStation({
+    ...req.body,
+    image: resizedImage.toBuffer(),
+  });
+
   res.status(201).json(trainStation);
 });
 

@@ -14,12 +14,6 @@ router.get("/", employeeMiddleware, async (req, res) => {
   res.json(users);
 });
 
-const UserCreationPayload = z.object({
-  name: z.string(),
-  email: z.string(),
-  username: z.string(),
-  password: z.string().min(8),
-});
 
 const UserRegisterSchema = z.object({
   name: z.string(),
@@ -51,18 +45,25 @@ router.post("/register", processRequestBody(UserRegisterSchema), (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedUser = await UserRepository.updateUser(id, req.body);
+  const Usermodify = req.user && (req.user.id === req.params.id || req.user.role === "Admin");
+  const isAdmin = req.user && req.user.role === "Admin";
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+  if (Usermodify && (isAdmin || req.body.username || req.body.name)) {
+    try {
+      const { id } = req.params;
+      const updatedUser = await UserRepository.updateUser(id, req.body);
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(updatedUser);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send("Internal server error");
     }
-
-    res.json(updatedUser);
-  } catch (e) {
-    console.log(e);
-    return res.status(500).send("Internal server error");
+  } else {
+    return res.status(403).json({ error: "Permission denied" });
   }
 });
 
@@ -85,6 +86,13 @@ router.post("/login", passport.authenticate("local"), async (req, res) => {
   res.status(200).json({ token: token, message: "Logged" });
 });
 
+/*
+const UserCreationPayload = z.object({
+  name: z.string(),
+  email: z.string(),
+  username: z.string(),
+  password: z.string().min(8),
+});
 router.post("/", processRequestBody(UserCreationPayload), async (req, res) => {
   const payload = req.body;
 
@@ -94,6 +102,8 @@ router.post("/", processRequestBody(UserCreationPayload), async (req, res) => {
   });
 
   res.status(201).json(user);
-});
+  
+});*/
+
 
 export default router;

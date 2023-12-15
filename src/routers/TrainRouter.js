@@ -19,6 +19,9 @@ router.get("/", async (req, res) => {
   }
 });
 
+
+
+
 router.post("/", adminMiddleware, async (req, res) => {
   const train = await TrainRepository.createTrain(req.body);
 
