@@ -26,6 +26,11 @@ class TrainRepository {
   async getTrainById(id) {
     return await TrainModel.findById(id);
   }
+  async deleteTrainsByStationName(stationName) {
+    await TrainModel.deleteMany({
+      $or: [{ start_station: stationName }, { end_station: stationName }],
+    });
+  }
 
   async updateTrain(id, payload) {
     const newTrain = await TrainModel.findOneAndUpdate(
@@ -40,7 +45,9 @@ class TrainRepository {
 
   async deleteTrain(id) {
     await TrainModel.deleteOne({ _id: id });
+
   }
 }
+
 
 export default new TrainRepository();

@@ -35,12 +35,17 @@ router.put("/:id", adminMiddleware, async (req, res) => {
     res.json(req.body);
   } catch (e) {
     console.log(e);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send("Please put a valid ID");
   }
 });
 
 router.delete("/:id", async (req, res) => {
   try {
+    const trainId = req.params.id;
+    const existingTrain = await TrainRepository.getTrainById(trainId);
+    if (!existingTrain) {
+      return res.status(404).json({ message: "Train not found" });
+    }
     const result = await TrainRepository.deleteTrain(req.params.id);
     res.status(200).json("train deleted or didn't exist");
   } catch (error) {

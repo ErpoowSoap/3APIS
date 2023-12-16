@@ -25,6 +25,11 @@ class UserRepository {
 
     return newUser;
   }
+
+  async deleteUser(id) {
+    await UserModel.deleteOne({ _id: id });
+  }
+
 }
 
 export default new UserRepository();
