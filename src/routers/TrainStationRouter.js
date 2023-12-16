@@ -1,8 +1,8 @@
 import express from "express";
 import TrainStationRepository from "../repositories/TrainStationRepository.js";
+import TrainRepository from "../repositories/TrainRepository.js";
 import { adminMiddleware } from "../middlewares/adminMiddleware.js";
 const router = express.Router();
-const fetch = require("node-fetch");
 
 router.get("/", async (req, res) => {
   const { sortBy, order } = req.query;
@@ -28,38 +28,18 @@ router.get("/:id", async (req, res) => {
       return res.status(404).send("Train station not found");
     }
 
-
     return res.json(trainStation);
   } catch (e) {
     console.log(e);
-    return res.status(500).send("Internal server error");
+    res.status(500).json({ message: "Please put a valid ID" });
   }
 });
-
-
 
 router.post("/", async (req, res) => {
-  const { imageUrl } = req.body;
-
-  if (!imageUrl) {
-    return res.status(400).send("Image URL is required");
-  }
-
-  const response = await fetch(imageUrl);
-  const imageData = await response.buffer();
-
-  const image = new Image();
-  image.src = imageData;
-
-  const resizedImage = image.resize({ width: 200, height: 200 });
-
-  const trainStation = await TrainStationRepository.createTrainStation({
-    ...req.body,
-    image: resizedImage.toBuffer(),
-  });
-
+  const trainStation = await TrainStationRepository.createTrainStation(req.body);
   res.status(201).json(trainStation);
 });
+
 
 router.put("/:id",adminMiddleware,  async (req, res) => {
   try {
@@ -68,19 +48,31 @@ router.put("/:id",adminMiddleware,  async (req, res) => {
     res.json(req.body);
   } catch (e) {
     console.log(e);
-    return res.status(500).send("Internal server error");
+    res.status(500).json({ message: "Please put a valid ID" });
   }
 });
 
 
-router.delete("/:id",adminMiddleware, async (req, res) => {
+router.delete("/:id", adminMiddleware, async (req, res) => {
   try {
-    const result = await TrainStationRepository.deleteTrainStation(req.params.id);
-    res.status(200).json("train station deleted or didn't exist");
+    const stationId = req.params.id;
+    
+    const trainStation = await TrainStationRepository.getTrainStationById(stationId);
+
+    if (!trainStation) {
+      return res.status(404).send("Trainstation not found");
+    }
+    const stationName = trainStation.name;
+    await TrainRepository.deleteTrainsByStationName(stationName);
+    const result = await TrainStationRepository.deleteTrainStation(stationId);
+
+    res.status(200).json({ message: "Train station and associated trains deleted successfully." });
   } catch (error) {
-    res.status(404).json({ message: "Internal server error"});
+    console.error(error);
+    res.status(500).json({ message: "Please put a valid ID" });
   }
 });
+
 
 
 export default router;

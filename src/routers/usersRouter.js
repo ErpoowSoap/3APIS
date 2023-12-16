@@ -86,6 +86,19 @@ router.post("/login", passport.authenticate("local"), async (req, res) => {
   res.status(200).json({ token: token, message: "Logged" });
 });
 
+router.delete("/:id", async (req, res) => {
+  const currentUserId = req.user.id;
+  const userIdToDelete = req.params.id;
+
+  if (currentUserId === userIdToDelete) {
+    await UserRepository.deleteUser(req.params.id);
+
+    res.status(204).send("delete");
+  } else {
+    return res.status(403).json({ error: "Permission denied" });
+  }
+});
+
 /*
 const UserCreationPayload = z.object({
   name: z.string(),
