@@ -14,8 +14,12 @@ Projet d'école en 3 ème année
 - Dézipper le projet sur l'IDE que vous souhaitez
 
 - Maintenant sur le terminal, faites la commande : 
+```
+npm i
+```
+ceci installera les dépendances présentes dans le package.json
 
-npm i , ceci installera les dépendances présentes dans le package.json
+-puis lancez le projet avec : 
 ```
 npm run dev
 ```
