@@ -1,5 +1,5 @@
 import { TrainModel } from "../models/TrainModel.js";
-
+import { TrainStationModel } from "../models/TrainStationModel.js"
 class TrainRepository {
   async getTrains({ sortBy, order, limit }) {
     const query = {};
@@ -22,15 +22,36 @@ class TrainRepository {
 
     return train;
   }
+  async stationExists(stationName) {
+    try {
+      const station = await TrainStationModel.findOne({ name: stationName });
+
+      return !!station; 
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error checking if station exists");
+    }
+  }
 
   async getTrainById(id) {
     return await TrainModel.findById(id);
   }
+ 
+
+
   async deleteTrainsByStationName(stationName) {
+    const deletedTrains = await TrainModel.find({
+      $or: [{ start_station: stationName }, { end_station: stationName }],
+    });
+    const deletedTrainIds = deletedTrains.map(train => train._id);
+  
     await TrainModel.deleteMany({
       $or: [{ start_station: stationName }, { end_station: stationName }],
     });
+  
+    return deletedTrainIds;
   }
+  
 
   async updateTrain(id, payload) {
     const newTrain = await TrainModel.findOneAndUpdate(

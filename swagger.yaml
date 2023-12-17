@@ -1,0 +1,490 @@
+openapi: 3.0.0
+info:
+  title: Railroad API
+  description: Documentation for the Railroad JSON API
+  version: 1.0.0
+
+paths:
+  /:
+    get:
+      summary: Get a list of users
+      description: Requires employee authorization
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                users:
+                  - id: 1
+                    name: John Doe
+                    email: john@example.com
+                    role: User
+
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request
+
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      description: Requires employee authorization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: John Doe
+                email: john@example.com
+                role: User
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Updated Name
+                email: john@example.com
+                role: User
+        '403':
+          description: Permission denied
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /login:
+    post:
+      summary: User login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Logged in successfully
+          content:
+            application/json:
+              example:
+                token: <token>
+                message: Logged
+        '401':
+          description: Unauthorized
+
+  /trains:
+    get:
+      summary: Get a list of trains
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                trains:
+                  - id: 1
+                    name: Train A
+                    start_station: Station A
+                    end_station: Station B
+                    time_of_departure: "2023-01-01T12:00:00.000Z"
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create a new train
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+      responses:
+        '201':
+          description: Train created successfully
+        '400':
+          description: Invalid input data
+        '403':
+          description: Permission denied
+        '500':
+          description: Internal server error
+
+  /trains/{id}:
+    get:
+      summary: Get a train by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Train A
+                start_station: Station A
+                end_station: Station B
+                time_of_departure: "2023-01-01T12:00:00.000Z"
+        '404':
+          description: Train not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update train by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+      responses:
+        '200':
+          description: Train updated successfully
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Updated Train
+                start_station: Station A
+                end_station: Station B
+                time_of_departure: "2023-01-01T12:00:00.000Z"
+        '403':
+          description: Permission denied
+        '404':
+          description: Train not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete train by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Train deleted successfully
+        '403':
+          description: Permission denied
+        '404':
+          description: Train not found
+        '500':
+          description: Internal server error
+
+  /trainstations:
+    get:
+      summary: Get a list of train stations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                trainStations:
+                  - id: 1
+                    name: Station A
+                    open_hour: "09:00 AM"
+                    close_hour: "05:00 PM"
+                    image: "station_a.jpg"
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create a new train station
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainStation'
+      responses:
+        '201':
+          description: Train station created successfully
+        '400':
+          description: Invalid input data
+        '403':
+          description: Permission denied
+        '500':
+          description: Internal server error
+
+  /trainstations/{id}:
+    get:
+      summary: Get a train station by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Station A
+                open_hour: "09:00 AM"
+                close_hour: "05:00 PM"
+                image: "station_a.jpg"
+        '404':
+          description: Train station not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update train station by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainStation'
+      responses:
+        '200':
+          description: Train station updated successfully
+          content:
+            application/json:
+              example:
+                id: 1
+                name: Updated Station
+                open_hour: "09:00 AM"
+                close_hour: "05:00 PM"
+                image: "station_a.jpg"
+        '403':
+          description: Permission denied
+        '404':
+          description: Train station not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete train station by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Train station deleted successfully
+        '403':
+          description: Permission denied
+        '404':
+          description: Train station not found
+        '500':
+          description: Internal server error
+  /tickets:
+    get:
+      summary: Get a list of tickets
+      description: Requires employee authorization
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                tickets:
+                  - id: 1
+                    UserID: <UserID>
+                    TrainID: <TrainID>
+                    isValidated: false
+
+    post:
+      summary: Create a new ticket
+      description: Requires employee authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ticket'
+      responses:
+        '201':
+          description: Ticket created successfully
+        '400':
+          description: Invalid input data
+        '404':
+          description: Train or User not found
+        '500':
+          description: Internal server error
+
+  /tickets/{id}:
+    get:
+      summary: Get a ticket by ID
+      description: Requires employee authorization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                id: 1
+                UserID: <UserID>
+                TrainID: <TrainID>
+                isValidated: false
+        '404':
+          description: Ticket not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Validate a ticket by ID
+      description: Requires employee authorization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ticket validated successfully
+          content:
+            application/json:
+              example:
+                id: 1
+                UserID: <UserID>
+                TrainID: <TrainID>
+                isValidated: true
+        '400':
+          description: Ticket has already been validated
+        '404':
+          description: Ticket not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete a ticket by ID
+      description: Requires admin authorization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ticket deleted successfully
+        '404':
+          description: Ticket not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Train:
+      type: object
+      properties:
+        name:
+          type: string
+        start_station:
+          type: string
+        end_station:
+          type: string
+        time_of_departure:
+          type: string
+          format: date-time
+
+    TrainStation:
+      type: object
+      properties:
+        name:
+          type: string
+        open_hour:
+          type: string
+        close_hour:
+          type: string
+        image:
+          type: string
+    
+    Ticket:
+      type: object
+      properties:
+        UserID:
+          type: string
+          description: User ID associated with the ticket
+        TrainID:
+          type: string
+          description: Train ID associated with the ticket
+        isValidated:
+          type: boolean
+          default: false
+          description: Indicates whether the ticket has been validated

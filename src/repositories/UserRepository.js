@@ -7,6 +7,7 @@ class UserRepository {
       {
         username: true,
         role: true,
+        email: true,
       }
     );
     return users;
@@ -15,6 +16,11 @@ class UserRepository {
   async createUser(userPayload) {
     return await UserModel.create(userPayload);
   }
+  async getUserById(id) {
+    return await UserModel.findById(id);
+  }
+
+  
   async updateUser(id, payload) {
     const newUser = await UserModel.findOneAndUpdate(
       {
